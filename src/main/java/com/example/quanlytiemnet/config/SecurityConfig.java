@@ -55,7 +55,20 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/admin/**"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**", "/error").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // Cho phép xem lịch làm việc
+                        .requestMatchers(
+                                "/admin/employees",
+                                "/admin/employees/shifts/**",
+                                "/admin/employees/shift-schedule/**")
+                        .hasAnyRole("ADMIN", "EMPLOYEE")
+                        // Chặn các thao tác CRUD
+                        .requestMatchers(
+                                "/admin/employees/add",
+                                "/admin/employees/update",
+                                "/admin/employees/delete/**",
+                                "/admin/employees/edit/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers("/employee/**").hasRole("EMPLOYEE")
                         .requestMatchers("/member/**").hasRole("USER")
                         .anyRequest().authenticated())

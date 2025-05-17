@@ -3,6 +3,8 @@ package com.example.quanlytiemnet.models;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,5 +26,6 @@ public class Service {
 	private Integer stockQuantity;
 
 	@OneToMany(mappedBy = "service")
+	@JsonIgnore
 	private List<ServiceTransaction> transactions;
 }

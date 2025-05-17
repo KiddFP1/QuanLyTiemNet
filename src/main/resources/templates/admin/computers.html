@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="admin/layout :: layout(~{::content})">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="admin/layout :: layout(~{::content})">
+
 <body>
     <div th:fragment="content">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -16,7 +16,6 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Tên máy</th>
                                 <th>Vị trí</th>
                                 <th>Trạng thái</th>
@@ -25,7 +24,6 @@
                         </thead>
                         <tbody>
                             <tr th:each="computer : ${computers}">
-                                <td th:text="${computer.computerId}"></td>
                                 <td th:text="${computer.computerName}"></td>
                                 <td th:text="${computer.location}"></td>
                                 <td>
@@ -36,12 +34,12 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary" 
-                                            th:onclick="'editComputer(' + ${computer.computerId} + ')'">
+                                    <button class="btn btn-sm btn-primary"
+                                        th:onclick="'editComputer(' + ${computer.computerId} + ')'">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger" 
-                                            th:onclick="'deleteComputer(' + ${computer.computerId} + ')'">
+                                    <button class="btn btn-sm btn-danger"
+                                        th:onclick="'deleteComputer(' + ${computer.computerId} + ')'">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -88,4 +86,5 @@
         </div>
     </div>
 </body>
+
 </html>

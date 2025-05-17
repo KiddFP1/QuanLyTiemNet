@@ -75,13 +75,11 @@ public class EmployeeController {
 
 	@PostMapping("/add")
 	public String addEmployee(@ModelAttribute @Validated Employee employee, RedirectAttributes redirectAttributes) {
+		if (!hasAdminRole()) {
+			redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Bạn không có quyền thêm nhân viên!");
+			return "redirect:/admin/employees";
+		}
 		try {
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-				redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Bạn không có quyền thực hiện chức năng này!");
-				return "redirect:/admin/employees";
-			}
-
 			employeeService.createEmployee(employee);
 			redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE, "Thêm nhân viên thành công");
 			log.info("Đã thêm nhân viên mới: {}", employee.getUsername());
@@ -128,6 +126,10 @@ public class EmployeeController {
 
 	@PostMapping("/update")
 	public String updateEmployee(@ModelAttribute @Validated Employee employee, RedirectAttributes redirectAttributes) {
+		if (!hasAdminRole()) {
+			redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Bạn không có quyền cập nhật nhân viên!");
+			return "redirect:/admin/employees";
+		}
 		try {
 			employeeService.updateEmployee(employee);
 			redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE, "Cập nhật nhân viên thành công");
@@ -140,6 +142,10 @@ public class EmployeeController {
 
 	@PostMapping("/delete/{id}")
 	public String deleteEmployee(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+		if (!hasAdminRole()) {
+			redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Bạn không có quyền xóa nhân viên!");
+			return "redirect:/admin/employees";
+		}
 		try {
 			employeeService.deleteEmployee(id);
 			redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE, "Xóa nhân viên thành công");
@@ -254,5 +260,11 @@ public class EmployeeController {
 	public String profile(Model model) {
 		log.info("Accessing employee profile");
 		return "employee/profile";
+	}
+
+	private boolean hasAdminRole() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		return auth != null && auth.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 	}
 }

@@ -16,12 +16,10 @@ public class DefaultController {
         log.info("Handling default routing for user: {}", authentication.getName());
         log.info("User authorities: {}", authentication.getAuthorities());
 
-        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-            log.info("Routing admin user to /admin/dashboard");
+        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||
+                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_EMPLOYEE"))) {
+            log.info("Routing admin/employee user to /admin/dashboard");
             return "redirect:/admin/dashboard";
-        } else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_EMPLOYEE"))) {
-            log.info("Routing employee user to /employee/dashboard");
-            return "redirect:/employee/dashboard";
         } else {
             log.info("Routing member user to /member/dashboard");
             return "redirect:/member/dashboard";

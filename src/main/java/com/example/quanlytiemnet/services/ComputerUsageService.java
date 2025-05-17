@@ -1,9 +1,13 @@
 package com.example.quanlytiemnet.services;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.quanlytiemnet.models.Computer;
 import com.example.quanlytiemnet.models.ComputerUsage;
@@ -11,6 +15,7 @@ import com.example.quanlytiemnet.models.Member;
 import com.example.quanlytiemnet.repositories.ComputerUsageRepository;
 
 @Service
+@Transactional
 public class ComputerUsageService {
 	@Autowired
 	private ComputerUsageRepository usageRepository;
@@ -32,5 +37,11 @@ public class ComputerUsageService {
 		usage.setEndTime(LocalDateTime.now());
 		computerService.updateComputerStatus(usage.getComputer().getComputerId(), "Available");
 		return usageRepository.save(usage);
+	}
+
+	public List<ComputerUsage> getUsagesBetweenDates(LocalDate startDate, LocalDate endDate) {
+		LocalDateTime startDateTime = startDate.atStartOfDay();
+		LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+		return usageRepository.findByStartTimeBetweenOrderByStartTimeDesc(startDateTime, endDateTime);
 	}
 }

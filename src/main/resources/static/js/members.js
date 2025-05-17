@@ -10,66 +10,106 @@ function getCsrfHeader() {
 document.addEventListener('DOMContentLoaded', function () {
     // Hàm sửa thành viên
     window.editMember = function (id) {
-        fetch(`/admin/members/edit/${id}`)
-            .then(response => response.json())
-            .then(member => {
-                // Populate form fields
-                document.querySelector('#addMemberForm input[name="username"]').value = member.username;
-                document.querySelector('#addMemberForm input[name="fullName"]').value = member.fullName;
-                document.querySelector('#addMemberForm input[name="phone"]').value = member.phone;
+        const headers = {};
+        headers[getCsrfHeader()] = getCsrfToken();
 
-                // Update form action
-                const form = document.getElementById('addMemberForm');
-                form.action = `/admin/members/update/${id}`;
+        fetch(`/admin/members/edit/${id}`, {
+            method: 'GET',
+            headers: headers
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(member => {
+                console.log('Received member data:', member); // Debug log
+
+                if (!member || !member.id) {
+                    throw new Error('Không nhận được dữ liệu thành viên hợp lệ');
+                }
+
+                // Populate form fields
+                document.getElementById('editMemberId').value = member.id;
+                document.getElementById('editUsername').value = member.username;
+                document.getElementById('editFullName').value = member.fullName;
+                document.getElementById('editPhone').value = member.phone || '';
 
                 // Show modal
-                new bootstrap.Modal(document.getElementById('addMemberModal')).show();
+                const editModal = new bootstrap.Modal(document.getElementById('editMemberModal'));
+                editModal.show();
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Không thể tải thông tin thành viên');
+                alert('Không thể tải thông tin thành viên: ' + error.message);
             });
     };
 
-    // Hàm xóa thành viên
-    const deleteButtons = document.querySelectorAll('.btn-delete');
-    if (deleteButtons) {
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                if (confirm('Bạn có chắc chắn muốn xóa thành viên này?')) {
-                    const memberId = this.getAttribute('data-id');
-                    const headers = {};
-                    headers[getCsrfHeader()] = getCsrfToken();
+    // Handle edit form submission
+    document.getElementById('editMemberForm')?.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-                    fetch(`/admin/members/delete/${memberId}`, {
-                        method: 'POST',
-                        headers: headers
-                    })
-                        .then(response => {
-                            if (response.ok) {
-                                window.location.reload();
-                            } else {
-                                alert('Có lỗi xảy ra khi xóa thành viên');
-                            }
-                        });
+        const formData = new FormData(this);
+        const headers = {};
+        headers[getCsrfHeader()] = getCsrfToken();
+
+        fetch('/admin/members/update', {
+            method: 'POST',
+            headers: headers,
+            body: new URLSearchParams(formData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi cập nhật thành viên: ' + error.message);
             });
-        });
-    }
+    });
+
+    // Hàm xóa thành viên
+    window.deleteMember = function (id) {
+        if (confirm('Bạn có chắc chắn muốn xóa thành viên này?')) {
+            const headers = {};
+            headers[getCsrfHeader()] = getCsrfToken();
+
+            fetch(`/admin/members/delete/${id}`, {
+                method: 'POST',
+                headers: headers
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi xóa thành viên: ' + error.message);
+                });
+        }
+    };
 
     // Hàm mở modal nạp tiền
     window.showTopUpModal = function (memberId) {
         document.getElementById('memberId').value = memberId;
+        document.getElementById('amount').value = ''; // Reset amount field
         new bootstrap.Modal(document.getElementById('topUpModal')).show();
     };
 
-    // Hàm nạp tiền
-    window.topUp = function () {
-        const memberId = document.getElementById('memberId').value;
-        const amount = document.querySelector('#topUpForm input[name="amount"]').value;
+    // Handle top-up form submission
+    document.getElementById('topUpForm')?.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-        if (!amount || isNaN(amount) || amount <= 0) {
-            alert('Vui lòng nhập số tiền hợp lệ');
+        const memberId = document.getElementById('memberId').value;
+        const amount = document.getElementById('amount').value;
+
+        if (!amount || isNaN(amount) || amount < 1000) {
+            alert('Vui lòng nhập số tiền hợp lệ (tối thiểu 1,000 đ)');
             return;
         }
 
@@ -86,24 +126,29 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('topUpModal'));
+                    modal.hide();
                     window.location.reload();
                 } else {
-                    alert(data.message || 'Có lỗi xảy ra khi nạp tiền');
+                    throw new Error(data.message || 'Có lỗi xảy ra khi nạp tiền');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra khi nạp tiền');
+                alert('Có lỗi xảy ra khi nạp tiền: ' + error.message);
             });
-    };
+    });
 
-    // Clean up forms when modals are hidden
-    document.getElementById('addMemberModal').addEventListener('hidden.bs.modal', function () {
+    // Reset forms when modals are hidden
+    document.getElementById('addMemberModal')?.addEventListener('hidden.bs.modal', function () {
         document.getElementById('addMemberForm').reset();
     });
 
-    document.getElementById('topUpModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('editMemberModal')?.addEventListener('hidden.bs.modal', function () {
+        document.getElementById('editMemberForm').reset();
+    });
+
+    document.getElementById('topUpModal')?.addEventListener('hidden.bs.modal', function () {
         document.getElementById('topUpForm').reset();
     });
 });

@@ -37,6 +37,7 @@
 
                         <!-- Form nạp tiền -->
                         <form th:action="@{/member/deposit}" method="post" class="needs-validation" novalidate>
+                            <input type="hidden" name="memberId" th:value="${user.id}">
                             <div class="mb-3">
                                 <label for="amount" class="form-label">Số tiền nạp (VNĐ)</label>
                                 <div class="input-group">

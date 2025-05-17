@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -43,9 +45,11 @@ public class Member {
 	@Column(name = "CreatedDate")
 	private LocalDateTime createdDate;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "member")
 	private List<ComputerUsage> computerUsages;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "member")
 	private List<ServiceTransaction> serviceTransactions;
 

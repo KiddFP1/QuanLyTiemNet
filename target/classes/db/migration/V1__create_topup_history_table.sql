@@ -1,0 +1,8 @@
+CREATE TABLE TopUpHistory (
+    TopUpID INT IDENTITY(1,1) PRIMARY KEY,
+    MemberID INT NOT NULL,
+    Amount DECIMAL(18,2) NOT NULL,
+    TopUpDate DATETIME NOT NULL,
+    Note NVARCHAR(255),
+    CONSTRAINT FK_TopUpHistory_Member FOREIGN KEY (MemberID) REFERENCES Member(MemberID)
+); 

@@ -11,7 +11,8 @@
     <div th:fragment="content">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Quản lý Nhân viên</h2>
-            <button id="addBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+            <button id="addBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal"
+                sec:authorize="hasRole('ROLE_ADMIN')">
                 <i class="fas fa-plus"></i> Thêm nhân viên
             </button>
         </div>
@@ -40,7 +41,7 @@
                                 <th>Tên đăng nhập</th>
                                 <th>Tên đầy đủ</th>
                                 <th>Chức vụ</th>
-                                <th>Thao tác</th>
+                                <th sec:authorize="hasRole('ROLE_ADMIN')">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,7 +50,7 @@
                                 <td th:text="${employee.username}"></td>
                                 <td th:text="${employee.fullName}"></td>
                                 <td th:text="${employee.role}"></td>
-                                <td>
+                                <td sec:authorize="hasRole('ROLE_ADMIN')">
                                     <button class="btn btn-primary btn-sm"
                                         th:onclick="'editEmployee(' + ${employee.id} + ')'">
                                         <i class="fas fa-edit"></i> Sửa
@@ -66,8 +67,7 @@
             </div>
         </div>
 
-
-        <!-- Lịch làm việc -->
+        <!-- Lịch làm việc của tất cả nhân viên -->
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">Lịch làm việc của tất cả nhân viên</h5>
@@ -77,9 +77,8 @@
             </div>
         </div>
 
-
-        <!-- Add Employee Modal -->
-        <div class="modal fade" id="addEmployeeModal" tabindex="-1">
+        <!-- Add Employee Modal - Only visible to ADMIN -->
+        <div class="modal fade" id="addEmployeeModal" tabindex="-1" sec:authorize="hasRole('ROLE_ADMIN')">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -118,8 +117,8 @@
             </div>
         </div>
 
-        <!-- Edit Employee Modal -->
-        <div class="modal fade" id="editEmployeeModal" tabindex="-1">
+        <!-- Edit Employee Modal - Only visible to ADMIN -->
+        <div class="modal fade" id="editEmployeeModal" tabindex="-1" sec:authorize="hasRole('ROLE_ADMIN')">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -254,11 +253,30 @@
             </div>
         </div>
 
+        <!-- View Shifts Modal - Visible to both ADMIN and EMPLOYEE -->
+        <div class="modal fade" id="viewShiftsModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Lịch làm việc</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Shift schedule content -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" onclick="saveShifts()"
+                            sec:authorize="hasRole('ROLE_ADMIN')">Lưu thay đổi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        var currentRole = /*[['${currentRole}']]*/ '';
+        var currentRole = /*[[${currentRole}]]*/ '';
         /*]]>*/
     </script>
 

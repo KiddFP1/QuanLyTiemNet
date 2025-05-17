@@ -8,23 +8,31 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.example.quanlytiemnet.models.Member;
+import com.example.quanlytiemnet.models.TopUpHistory;
 import com.example.quanlytiemnet.repositories.MemberRepository;
+import com.example.quanlytiemnet.repositories.TopUpHistoryRepository;
 
 @Service
+@Transactional
 public class MemberService {
 	@Autowired
 	private MemberRepository memberRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private TopUpHistoryRepository topUpHistoryRepository;
 
+	@Transactional(readOnly = true)
 	public List<Member> getAllMembers() {
 		return memberRepository.findAll();
 	}
 
 	public Member createMember(Member member) {
-		member.setPassword(member.getPassword());
+		member.setPassword(passwordEncoder.encode(member.getPassword()));
 		member.setCreatedDate(LocalDateTime.now());
 		member.setBalance(BigDecimal.ZERO);
 		member.setPoints(0);
@@ -33,10 +41,20 @@ public class MemberService {
 
 	public Member updateMember(Member member) {
 		Member existingMember = getMemberById(member.getId());
-		member.setPassword(existingMember.getPassword());
-		member.setBalance(existingMember.getBalance());
+
+		if (StringUtils.hasText(member.getPassword())) {
+			member.setPassword(passwordEncoder.encode(member.getPassword()));
+		} else {
+			member.setPassword(existingMember.getPassword());
+		}
+
+		if (member.getBalance() == null) {
+			member.setBalance(existingMember.getBalance());
+		}
+
 		member.setPoints(existingMember.getPoints());
 		member.setCreatedDate(existingMember.getCreatedDate());
+
 		return memberRepository.save(member);
 	}
 
@@ -44,6 +62,7 @@ public class MemberService {
 		memberRepository.deleteById(id);
 	}
 
+	@Transactional(readOnly = true)
 	public Member getMemberById(Integer id) {
 		return memberRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Không tìm thấy thành viên"));
@@ -53,5 +72,9 @@ public class MemberService {
 		Member member = getMemberById(memberId);
 		member.setBalance(member.getBalance().add(amount));
 		memberRepository.save(member);
+	}
+
+	public List<TopUpHistory> getTopUpHistoryBetweenDates(LocalDateTime startDate, LocalDateTime endDate) {
+		return topUpHistoryRepository.findByTopUpDateBetweenOrderByTopUpDateDesc(startDate, endDate);
 	}
 }

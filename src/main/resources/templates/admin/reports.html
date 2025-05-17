@@ -1,100 +1,142 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="admin/layout :: layout(~{::content})">
-<head>
-  <style>
-    .card {
-        height: 100%;
-    }
-  </style>  
-</head>
-<body>
-<div th:fragment="content">
-<h2><br></h2>
-    <div class="row mt-4">
-        <!-- Revenue Report -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Báo cáo doanh thu</h5>
-                </div>
-                <div class="card-body">
-                    <form th:action="@{/admin/reports/revenue}" method="get">
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label>Từ ngày</label>
-                                <input type="date" name="startDate" class="form-control" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
-                            </div>
-                            <div class="col">
-                                <label>Đến ngày</label>
-                                <input type="date" name="endDate" class="form-control" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Xem báo cáo</button>
-                    </form>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="admin/layout :: layout(~{::content})">
 
-                    <div th:if="${revenueReport}">
-                        <div th:if="${revenueReport.dailyRevenues.isEmpty()}" class="mt-4">
-                            <p>Không có dữ liệu báo cáo cho ngày đã chọn.</p>
-                        </div>
-                        <div th:unless="${revenueReport.dailyRevenues.isEmpty()}" class="mt-4">
-                            <h6>Tổng doanh thu: <span th:text="${#numbers.formatDecimal(revenueReport.totalRevenue, 0, 'DEFAULT', 0, 'DEFAULT')} + ' đ'"></span></h6>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Ngày</th>
-                                        <th>Doanh thu máy</th>
-                                        <th>Doanh thu dịch vụ</th>
-                                        <th>Tổng</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="daily : ${revenueReport.dailyRevenues}">
-                                        <td th:text="${#temporals.format(daily.date, 'dd/MM/yyyy')}"></td>
-                                        <td th:text="${#numbers.formatDecimal(daily.computerRevenue, 0, 'DEFAULT', 0, 'DEFAULT')} + ' đ'"></td>
-                                        <td th:text="${#numbers.formatDecimal(daily.serviceRevenue, 0, 'DEFAULT', 0, 'DEFAULT')} + ' đ'"></td>
-                                        <td th:text="${#numbers.formatDecimal(daily.totalRevenue, 0, 'DEFAULT', 0, 'DEFAULT')} + ' đ'"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+<head>
+    <style>
+        .card {
+            height: 100%;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Báo cáo Doanh thu</h2>
+            <div>
+                <form class="d-flex gap-2" id="reportForm" method="get">
+                    <div class="form-group">
+                        <input type="date" class="form-control" id="startDate" name="startDate" th:value="${startDate}">
                     </div>
-                    <div th:unless="${revenueReport}" class="mt-4">
-                        <p>Vui lòng chọn khoảng ngày và nhấp Xem báo cáo để tạo báo cáo doanh thu.</p>
-                    </div>  
+                    <div class="form-group">
+                        <input type="date" class="form-control" id="endDate" name="endDate" th:value="${endDate}">
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" id="period" name="period">
+                            <option value="day" th:selected="${period == 'day'}">Theo ngày</option>
+                            <option value="week" th:selected="${period == 'week'}">Theo tuần</option>
+                            <option value="month" th:selected="${period == 'month'}">Theo tháng</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Xem báo cáo</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Biểu đồ doanh thu -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
                 </div>
             </div>
         </div>
-        
-        <!-- Inventory Report -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Báo cáo tồn kho</h5>
+
+        <div class="row">
+            <!-- Tổng doanh thu -->
+            <div class="col-md-3 mb-4">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-2">Tổng doanh thu</h6>
+                                <h3 class="mb-0"
+                                    th:text="${#numbers.formatDecimal(totalRevenue,0,'COMMA',0,'POINT')} + ' đ'">0 đ
+                                </h3>
+                            </div>
+                            <i class="fas fa-coins fa-2x opacity-50"></i>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <table class="table">
+            </div>
+
+            <!-- Số tiền sử dụng máy -->
+            <div class="col-md-3 mb-4">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-2">Số tiền sử dụng máy</h6>
+                                <h3 class="mb-0"
+                                    th:text="${#numbers.formatDecimal(usageAmount,0,'COMMA',0,'POINT')} + ' đ'">0 đ
+                                </h3>
+                            </div>
+                            <i class="fas fa-desktop fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doanh thu từ nạp tiền -->
+            <div class="col-md-3 mb-4">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-2">Doanh thu nạp tiền</h6>
+                                <h3 class="mb-0"
+                                    th:text="${#numbers.formatDecimal(topUpRevenue,0,'COMMA',0,'POINT')} + ' đ'">0 đ
+                                </h3>
+                            </div>
+                            <i class="fas fa-wallet fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Số lượng giao dịch -->
+            <div class="col-md-3 mb-4">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-2">Tổng giao dịch</h6>
+                                <h3 class="mb-0" th:text="${totalTransactions}">0</h3>
+                                <small th:text="'Nạp tiền: ' + ${topUpCount} + ' | Sử dụng: ' + ${usageCount}"></small>
+                            </div>
+                            <i class="fas fa-exchange-alt fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chi tiết doanh thu -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Chi tiết doanh thu</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Dịch vụ</th>
-                                <th>Danh mục</th>
-                                <th>Tồn kho</th>
-                                <th>Trạng thái</th>
+                                <th>Thời gian</th>
+                                <th>Doanh thu</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="item : ${inventory}">
-                                <td th:text="${item.serviceName}"></td>
-                                <td th:text="${item.category}"></td>
-                                <td th:text="${item.stockQuantity}"></td>
-                                <td>
-                                    <span th:class="'badge ' + 
-                                        (${item.stockQuantity > 10} ? 'bg-success' : 
-                                        (${item.stockQuantity > 0} ? 'bg-warning' : 'bg-danger'))">
-                                        [[${item.stockQuantity > 10 ? 'Đủ hàng' : 
-                                           (item.stockQuantity > 0 ? 'Sắp hết' : 'Hết hàng')}]]
-                                    </span>
+                            <tr th:each="entry : ${revenueByPeriod}">
+                                <td
+                                    th:text="${#temporals.format(entry.key, period == 'month' ? 'MM/yyyy' : 'dd/MM/yyyy')}">
                                 </td>
+                                <td th:text="${#numbers.formatDecimal(entry.value,0,'COMMA',0,'POINT')} + ' đ'"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -102,6 +144,65 @@
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Thêm Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        // Lấy dữ liệu từ Thymeleaf
+        const revenueData = /*[[${revenueByPeriod}]]*/ {};
+        const period = /*[[${period}]]*/ 'day';
+
+        // Chuẩn bị dữ liệu cho biểu đồ
+        const labels = Object.keys(revenueData).map(date => {
+            const d = new Date(date);
+            if (period === 'month') {
+                return new Intl.DateTimeFormat('vi-VN', { month: 'short', year: 'numeric' }).format(d);
+            } else {
+                return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
+            }
+        });
+        const data = Object.values(revenueData);
+
+        // Vẽ biểu đồ
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: data,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    fill: true,
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' đ';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
+
 </html>
