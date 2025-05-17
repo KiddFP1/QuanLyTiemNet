@@ -1,0 +1,146 @@
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Navbar Styles */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+}
+
+/* Card Styles */
+.card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Product Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+}
+
+/* Balance Card */
+.balance-card {
+    background: linear-gradient(45deg, #2196F3, #1976D2);
+    color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.balance-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.balance-card .amount {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* Time Card */
+.time-card {
+    background: linear-gradient(45deg, #4CAF50, #388E3C);
+    color: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.time-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.time-card .time {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* Order Status Badges */
+.badge-pending {
+    background-color: #FFC107;
+    color: #000;
+}
+
+.badge-confirmed {
+    background-color: #2196F3;
+    color: #fff;
+}
+
+.badge-completed {
+    background-color: #4CAF50;
+    color: #fff;
+}
+
+.badge-cancelled {
+    background-color: #F44336;
+    color: #fff;
+}
+
+/* Form Styles */
+.form-control:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+.btn-primary {
+    background-color: #2196F3;
+    border-color: #2196F3;
+}
+
+.btn-primary:hover {
+    background-color: #1976D2;
+    border-color: #1976D2;
+}
+
+/* Social Links */
+.social-links a {
+    font-size: 1.2rem;
+    transition: color 0.2s;
+}
+
+.social-links a:hover {
+    color: #2196F3 !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .balance-card,
+    .time-card {
+        padding: 1rem;
+    }
+
+    .balance-card .amount,
+    .time-card .time {
+        font-size: 1.5rem;
+    }
+}

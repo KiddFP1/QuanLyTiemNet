@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::content})">
+<head>
+  <style>
+    .card {
+        height: 100%;
+    }
+  </style>  
+</head>
+<body>
+<div th:fragment="content">
+<h2><br></h2>
+    <div class="row mt-4">
+        <!-- Revenue Report -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Báo cáo doanh thu</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/reports/revenue}" method="get">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label>Từ ngày</label>
+                                <input type="date" name="startDate" class="form-control" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
+                            </div>
+                            <div class="col">
+                                <label>Đến ngày</label>
+                                <input type="date" name="endDate" class="form-control" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Xem báo cáo</button>
+                    </form>
+
+                    <div th:if="${revenueReport}">
+                        <div th:if="${revenueReport.dailyRevenues.isEmpty()}" class="mt-4">
+                            <p>Không có dữ liệu báo cáo cho ngày đã chọn.</p>
+                        </div>
+                        <div th:unless="${revenueReport.dailyRevenues.isEmpty()}" class="mt-4">
+                            <h6>Tổng doanh thu: <span th:text="${#numbers.formatDecimal(revenueReport.totalRevenue, 0, 'DEFAULT', 0, 'DEFAULT')} + ' đ'"></span></h6>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày</th>
+                                        <th>Doanh thu máy</th>
+                                        <th>Doanh thu dịch vụ</th>
+                                        <th>Tổng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="daily : ${revenueReport.dailyRevenues}">
+                                        <td th:text="${#temporals.format(daily.date, 'dd/MM/yyyy')}"></td>
+                                        <td th:text="${#numbers.formatDecimal(daily.computerRevenue, 0, 'DEFAULT', 0, 'DEFAULT')} + ' đ'"></td>
+                                        <td th:text="${#numbers.formatDecimal(daily.serviceRevenue, 0, 'DEFAULT', 0, 'DEFAULT')} + ' đ'"></td>
+                                        <td th:text="${#numbers.formatDecimal(daily.totalRevenue, 0, 'DEFAULT', 0, 'DEFAULT')} + ' đ'"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div th:unless="${revenueReport}" class="mt-4">
+                        <p>Vui lòng chọn khoảng ngày và nhấp Xem báo cáo để tạo báo cáo doanh thu.</p>
+                    </div>  
+                </div>
+            </div>
+        </div>
+        
+        <!-- Inventory Report -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Báo cáo tồn kho</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Dịch vụ</th>
+                                <th>Danh mục</th>
+                                <th>Tồn kho</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${inventory}">
+                                <td th:text="${item.serviceName}"></td>
+                                <td th:text="${item.category}"></td>
+                                <td th:text="${item.stockQuantity}"></td>
+                                <td>
+                                    <span th:class="'badge ' + 
+                                        (${item.stockQuantity > 10} ? 'bg-success' : 
+                                        (${item.stockQuantity > 0} ? 'bg-warning' : 'bg-danger'))">
+                                        [[${item.stockQuantity > 10 ? 'Đủ hàng' : 
+                                           (item.stockQuantity > 0 ? 'Sắp hết' : 'Hết hàng')}]]
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

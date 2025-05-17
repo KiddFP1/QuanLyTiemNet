@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
+
+<head>
+    <title>Dashboard</title>
+</head>
+
+<body>
+    <div th:fragment="content">
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-primary text-white mb-4">
+                    <div class="card-body">
+                        <h5>Máy đang sử dụng</h5>
+                        <h2 th:text="${computerInUse}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-success text-white mb-4">
+                    <div class="card-body">
+                        <h5>Doanh thu hôm nay</h5>
+                        <h2 th:text="${todayRevenue}">0đ</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-warning text-white mb-4">
+                    <div class="card-body">
+                        <h5>Máy trống</h5>
+                        <h2 th:text="${availableComputers}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-danger text-white mb-4">
+                    <div class="card-body">
+                        <h5>Máy bảo trì</h5>
+                        <h2 th:text="${maintenanceComputers}">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Computer Grid -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-desktop me-1"></i> Trạng thái máy
+            </div>
+            <div class="card-body">
+                <div class="computer-grid">
+                    <div class="computer-item" th:each="computer : ${computers}">
+                        <div th:class="'computer-status ' + ${computer.status}">
+                            <div class="computer-name" th:text="${computer.computerName}">PC-01</div>
+                            <div class="status-label" th:text="${computer.status}">Available</div>
+                            <div th:if="${computer.status == 'InUse'}" class="usage-info">
+                                <span th:text="${computer.getCurrentUser()?.getUsername()}"></span>
+                                <span th:text="${#temporals.format(computer.startTime, 'HH:mm')}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mt-4">
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-line me-1"></i> Doanh thu 7 ngày gần nhất
+                    </div>
+                    <div class="card-body">
+                        <div id="revenue-chart" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie me-1"></i> Thống kê sử dụng máy
+                    </div>
+                    <div class="card-body">
+                        <div id="usage-chart" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Initialize Chart Data -->
+        <script th:inline="javascript">
+            // Khởi tạo dữ liệu biểu đồ từ controller
+            const revenueData = /*[[${revenueDataJson}]]*/[];
+            const usageData = /*[[${usageDataJson}]]*/[];
+        </script>
+
+        <!-- Load Chart Script -->
+        <script src="/js/dashboard.js"></script>
+    </div>
+</body>
+
+</html>

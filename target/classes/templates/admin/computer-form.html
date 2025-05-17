@@ -1,0 +1,38 @@
+<!-- src/main/resources/templates/admin/computer-form.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="admin/layout :: layout(~{::content})">
+<body>
+    <div th:fragment="content">
+        <h2 th:text="${computer.computerId == null ? 'Thêm máy mới' : 'Sửa thông tin máy'}"></h2>
+        
+        <form th:action="@{${computer.computerId == null ? '/admin/computers/add' : '/admin/computers/edit/' + computer.computerId}}"
+              th:object="${computer}" method="post">
+            
+            <div class="mb-3">
+                <label for="computerName" class="form-label">Tên máy:</label>
+                <input type="text" class="form-control" id="computerName" 
+                       th:field="*{computerName}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="location" class="form-label">Vị trí:</label>
+                <input type="text" class="form-control" id="location" 
+                       th:field="*{location}">
+            </div>
+
+            <div class="mb-3">
+                <label for="status" class="form-label">Trạng thái:</label>
+                <select class="form-control" id="status" th:field="*{status}">
+                    <option value="Available">Sẵn sàng</option>
+                    <option value="InUse">Đang sử dụng</option>
+                    <option value="Maintenance">Bảo trì</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <a href="/admin/computers" class="btn btn-secondary">Hủy</a>
+        </form>
+    </div>
+</body>
+</html>

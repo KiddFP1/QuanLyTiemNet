@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Nạp tiền - Tiệm Net</title>
+</head>
+
+<body>
+    <div th:replace="~{member/layout :: content}">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">
+                            <i class="fas fa-wallet me-2"></i>Nạp tiền vào tài khoản
+                        </h4>
+
+                        <!-- Thông tin tài khoản -->
+                        <div class="alert alert-info">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1">
+                                        <strong>Số dư hiện tại:</strong>
+                                        <span
+                                            th:text="${#numbers.formatDecimal(user.accountBalance, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0
+                                            VNĐ</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1">
+                                        <strong>Điểm tích lũy:</strong>
+                                        <span th:text="${user.points + ' điểm'}">0 điểm</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form nạp tiền -->
+                        <form th:action="@{/member/deposit}" method="post" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Số tiền nạp (VNĐ)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="amount" name="amount" min="10000"
+                                        step="10000" required th:value="${amount}">
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                                <div class="form-text">
+                                    Số tiền tối thiểu: 10,000 VNĐ
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Phương thức nạp tiền</label>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="cash"
+                                                value="CASH" checked>
+                                            <label class="form-check-label" for="cash">
+                                                <i class="fas fa-money-bill-wave me-2"></i>Tiền mặt
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="momo"
+                                                value="MOMO">
+                                            <label class="form-check-label" for="momo">
+                                                <i class="fas fa-mobile-alt me-2"></i>Ví MoMo
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                                id="banking" value="BANKING">
+                                            <label class="form-check-label" for="banking">
+                                                <i class="fas fa-university me-2"></i>Chuyển khoản
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="note" class="form-label">Ghi chú (không bắt buộc)</label>
+                                <textarea class="form-control" id="note" name="note" rows="2"
+                                    th:value="${note}"></textarea>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check-circle me-2"></i>Xác nhận nạp tiền
+                                </button>
+                                <a th:href="@{/member/home}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Lịch sử nạp tiền -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="fas fa-history me-2"></i>Lịch sử nạp tiền
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Số tiền</th>
+                                        <th>Phương thức</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="deposit : ${depositHistory}">
+                                        <td th:text="${#temporals.format(deposit.createdAt, 'HH:mm dd/MM/yyyy')}">
+                                            10:00 01/01/2024
+                                        </td>
+                                        <td
+                                            th:text="${#numbers.formatDecimal(deposit.amount, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
+                                            0 VNĐ
+                                        </td>
+                                        <td th:text="${deposit.paymentMethod}">Tiền mặt</td>
+                                        <td>
+                                            <span th:class="${'badge ' + (deposit.status == 'CONFIRMED' ? 'badge-confirmed' : 
+                                                                        deposit.status == 'PENDING' ? 'badge-pending' : 
+                                                                        'badge-cancelled')}" th:text="${deposit.status == 'CONFIRMED' ? 'Đã xác nhận' : 
+                                                           deposit.status == 'PENDING' ? 'Đang chờ' : 
+                                                           'Đã hủy'}">
+                                                Đang chờ
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form validation script -->
+    <script>
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout :: layout(~{::content})">
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Quản lý Máy tính</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addComputerModal">
+                <i class="fas fa-plus"></i> Thêm máy mới
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên máy</th>
+                                <th>Vị trí</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="computer : ${computers}">
+                                <td th:text="${computer.computerId}"></td>
+                                <td th:text="${computer.computerName}"></td>
+                                <td th:text="${computer.location}"></td>
+                                <td>
+                                    <span th:class="'badge ' + 
+                                        (${computer.status == 'Available'} ? 'bg-success' : 
+                                        (${computer.status == 'InUse'} ? 'bg-warning' : 'bg-danger'))"
+                                        th:text="${computer.status}">
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" 
+                                            th:onclick="'editComputer(' + ${computer.computerId} + ')'">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" 
+                                            th:onclick="'deleteComputer(' + ${computer.computerId} + ')'">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Computer Modal -->
+        <div class="modal fade" id="addComputerModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm máy mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addComputerForm" th:action="@{/admin/computers/add}" method="post">
+                            <div class="mb-3">
+                                <label for="computerName" class="form-label">Tên máy</label>
+                                <input type="text" class="form-control" id="computerName" name="computerName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="location" class="form-label">Vị trí</label>
+                                <input type="text" class="form-control" id="location" name="location">
+                            </div>
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Trạng thái</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="Available">Sẵn sàng</option>
+                                    <option value="Maintenance">Bảo trì</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" form="addComputerForm" class="btn btn-primary">Thêm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
