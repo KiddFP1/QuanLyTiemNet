@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{member/layout :: layout(~{::content})}">
+
+<head>
+    <title>Thông tin tài khoản</title>
+</head>
+
+<body>
+    <div th:fragment="content">
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Thông tin tài khoản</h1>
+
+            <!-- Account Information -->
+            <div class="row mt-4">
+                <div class="col-xl-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-user me-1"></i> Thông tin cá nhân
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/member/profile/update}" method="post" th:object="${member}">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Tên đăng nhập</label>
+                                    <input type="text" class="form-control" id="username" th:field="*{username}"
+                                        readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="fullName" class="form-label">Họ và tên</label>
+                                    <input type="text" class="form-control" id="fullName" th:field="*{fullName}"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Số điện thoại</label>
+                                    <input type="tel" class="form-control" id="phone" th:field="*{phone}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Số dư tài khoản</label>
+                                    <p class="form-control-plaintext"
+                                        th:text="${#numbers.formatDecimal(member.balance,0,'COMMA',0,'POINT') + ' VNĐ'}">
+                                        0 VNĐ</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Ngày tạo tài khoản</label>
+                                    <p class="form-control-plaintext"
+                                        th:text="${#temporals.format(member.createdDate, 'dd/MM/yyyy HH:mm')}">
+                                        01/01/2024</p>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Change Password -->
+                <div class="col-xl-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-key me-1"></i> Đổi mật khẩu
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/member/profile/change-password}" method="post">
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label">Mật khẩu hiện tại</label>
+                                    <input type="password" class="form-control" id="currentPassword"
+                                        name="currentPassword" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                                    <input type="password" class="form-control" id="newPassword" name="newPassword"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
+                                    <input type="password" class="form-control" id="confirmPassword"
+                                        name="confirmPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

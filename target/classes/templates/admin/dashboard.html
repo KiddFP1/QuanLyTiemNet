@@ -3,6 +3,8 @@
 
 <head>
     <title>Dashboard</title>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </head>
 
 <body>
@@ -64,39 +66,174 @@
             </div>
         </div>
 
-        <!-- Charts Section -->
+        <!-- Notifications Section -->
         <div class="row mt-4">
+            <!-- Top-up Requests -->
             <div class="col-xl-6">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <i class="fas fa-chart-line me-1"></i> Doanh thu 7 ngày gần nhất
+                        <i class="fas fa-money-bill-wave me-1"></i> Yêu Cầu Nạp Tiền
                     </div>
                     <div class="card-body">
-                        <div id="revenue-chart" style="height: 300px;"></div>
+                        <div th:if="${#lists.isEmpty(pendingTopUps)}" class="text-center text-muted">
+                            Không có yêu cầu nạp tiền nào
+                        </div>
+                        <div th:unless="${#lists.isEmpty(pendingTopUps)}" class="list-group">
+                            <div th:each="request : ${pendingTopUps}" class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1" th:text="${request.member.username}">Username</h6>
+                                        <p class="mb-1">
+                                            Số tiền: <span
+                                                th:text="${#numbers.formatDecimal(request.amount,0,'COMMA',0,'POINT')} + ' VNĐ'">0
+                                                VNĐ</span>
+                                        </p>
+                                        <small
+                                            th:text="${#temporals.format(request.requestDate, 'dd/MM/yyyy HH:mm')}">Thời
+                                            gian</small>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-success btn-sm"
+                                            th:onclick="'approveTopUp(' + ${request.id} + ')'">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm"
+                                            th:onclick="'rejectTopUp(' + ${request.id} + ')'">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Service Orders -->
             <div class="col-xl-6">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <i class="fas fa-chart-pie me-1"></i> Thống kê sử dụng máy
+                        <i class="fas fa-utensils me-1"></i> Đơn Hàng Dịch Vụ
                     </div>
                     <div class="card-body">
-                        <div id="usage-chart" style="height: 300px;"></div>
+                        <div th:if="${#lists.isEmpty(pendingOrders)}" class="text-center text-muted">
+                            Không có đơn hàng nào
+                        </div>
+                        <div th:unless="${#lists.isEmpty(pendingOrders)}" class="list-group">
+                            <div th:each="order : ${pendingOrders}" class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1" th:text="${order.member.username}">Username</h6>
+                                        <p class="mb-1">
+                                            <span th:text="${order.service.serviceName}">Tên món</span> x
+                                            <span th:text="${order.quantity}">1</span>
+                                        </p>
+                                        <small th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">Thời
+                                            gian</small>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-success btn-sm"
+                                            th:onclick="'completeOrder(' + ${order.id} + ')'">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm"
+                                            th:onclick="'cancelOrder(' + ${order.id} + ')'">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Initialize Chart Data -->
-        <script th:inline="javascript">
-            // Khởi tạo dữ liệu biểu đồ từ controller
-            const revenueData = /*[[${revenueDataJson}]]*/[];
-            const usageData = /*[[${usageDataJson}]]*/[];
-        </script>
+        <!-- JavaScript for handling notifications -->
+        <script>
+            const csrfToken = document.querySelector("meta[name='_csrf']").content;
+            const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 
-        <!-- Load Chart Script -->
-        <script src="/js/dashboard.js"></script>
+            function approveTopUp(requestId) {
+                if (confirm('Xác nhận duyệt yêu cầu nạp tiền này?')) {
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    headers[csrfHeader] = csrfToken;
+
+                    fetch('/admin/topup/approve/' + requestId, {
+                        method: 'POST',
+                        headers: headers
+                    }).then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert('Có lỗi xảy ra khi duyệt yêu cầu');
+                        }
+                    });
+                }
+            }
+
+            function rejectTopUp(requestId) {
+                if (confirm('Xác nhận từ chối yêu cầu nạp tiền này?')) {
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    headers[csrfHeader] = csrfToken;
+
+                    fetch('/admin/topup/reject/' + requestId, {
+                        method: 'POST',
+                        headers: headers
+                    }).then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert('Có lỗi xảy ra khi từ chối yêu cầu');
+                        }
+                    });
+                }
+            }
+
+            function completeOrder(orderId) {
+                if (confirm('Xác nhận hoàn thành đơn hàng này?')) {
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    headers[csrfHeader] = csrfToken;
+
+                    fetch('/admin/orders/complete/' + orderId, {
+                        method: 'POST',
+                        headers: headers
+                    }).then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert('Có lỗi xảy ra khi hoàn thành đơn hàng');
+                        }
+                    });
+                }
+            }
+
+            function cancelOrder(orderId) {
+                if (confirm('Xác nhận hủy đơn hàng này?')) {
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    headers[csrfHeader] = csrfToken;
+
+                    fetch('/admin/orders/cancel/' + orderId, {
+                        method: 'POST',
+                        headers: headers
+                    }).then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert('Có lỗi xảy ra khi hủy đơn hàng');
+                        }
+                    });
+                }
+            }
+        </script>
     </div>
 </body>
 

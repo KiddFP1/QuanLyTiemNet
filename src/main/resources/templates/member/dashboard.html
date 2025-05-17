@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{member/layout :: layout(~{::content})}">
+
+<head>
+    <title>Trang Chủ Thành Viên</title>
+</head>
+
+<body>
+    <div th:fragment="content">
+        <div class="container-fluid px-4">
+
+
+            <!-- Account Summary Cards -->
+            <div class="row mt-4">
+                <div class="col-xl-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-wallet me-1"></i> Số Dư Tài Khoản
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-text mb-4"
+                                th:text="${#numbers.formatDecimal(member.balance,0,'COMMA',0,'POINT')} + ' VNĐ'">0 VNĐ
+                            </h3>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#topUpModal">
+                                <i class="fas fa-plus me-1"></i> Yêu Cầu Nạp Tiền
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-xl-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-desktop me-1"></i> Trạng Thái Máy
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-text mb-4">Chưa Sử Dụng</h3>
+                            <a href="#" class="btn btn-success">
+                                <i class="fas fa-play me-1"></i> Bắt Đầu Phiên
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="row">
+                <div class="col-xl-6">
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-history me-1"></i> Hoạt Động Gần Đây
+                            </div>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#orderServiceModal">
+                                <i class="fas fa-plus me-1"></i> Gọi Món
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${#lists.isEmpty(serviceOrders)}" class="text-center text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <p>Chưa có hoạt động nào</p>
+                            </div>
+                            <div th:unless="${#lists.isEmpty(serviceOrders)}" class="list-group">
+                                <div th:each="order : ${serviceOrders}" class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1" th:text="${order.service.serviceName}">Tên món</h6>
+                                        <small th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">Thời
+                                            gian</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        Số lượng: <span th:text="${order.quantity}">1</span> |
+                                        Tổng tiền: <span
+                                            th:text="${#numbers.formatDecimal(order.totalPrice,0,'COMMA',0,'POINT')} + ' VNĐ'">0
+                                            VNĐ</span>
+                                    </p>
+                                    <small
+                                        th:class="${'badge ' + (order.status == 'PENDING' ? 'bg-warning' : (order.status == 'COMPLETED' ? 'bg-success' : 'bg-danger'))}"
+                                        th:text="${order.status}">Trạng thái</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-money-bill-wave me-1"></i> Yêu Cầu Nạp Tiền
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${#lists.isEmpty(topUpRequests)}" class="text-center text-muted">
+                                <i class="fas fa-coins fa-3x mb-3"></i>
+                                <p>Chưa có yêu cầu nạp tiền nào</p>
+                            </div>
+                            <div th:unless="${#lists.isEmpty(topUpRequests)}" class="list-group">
+                                <div th:each="request : ${topUpRequests}" class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1"
+                                            th:text="${request.status == 'APPROVED' ? 'Nạp tiền thành công' : (request.status == 'REJECTED' ? 'Nạp tiền thất bại' : 'Đang chờ duyệt')}">
+                                            Nạp tiền</h6>
+                                        <small
+                                            th:text="${#temporals.format(request.requestDate, 'dd/MM/yyyy HH:mm')}">Thời
+                                            gian</small>
+                                    </div>
+                                    <p class="mb-1"
+                                        th:text="${'Số tiền: ' + #numbers.formatDecimal(request.amount,0,'COMMA',0,'POINT') + ' VNĐ'}">
+                                        Số tiền</p>
+                                    <small th:if="${request.note}" th:text="${request.note}" class="text-muted">Ghi
+                                        chú</small>
+                                    <small
+                                        th:class="${'badge ' + (request.status == 'PENDING' ? 'bg-warning' : (request.status == 'APPROVED' ? 'bg-success' : 'bg-danger'))}"
+                                        th:text="${request.status}">Trạng thái</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modals -->
+            <div class="modal fade" id="topUpModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-money-bill-wave me-1"></i> Yêu Cầu Nạp Tiền
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form th:action="@{/member/topup/request}" method="post">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="amount" class="form-label">Số Tiền (VNĐ)</label>
+                                    <input type="number" class="form-control" id="amount" name="amount" min="10000"
+                                        step="1000" required>
+                                    <div class="form-text">Số tiền tối thiểu là 10,000 VNĐ</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="note" class="form-label">Ghi Chú</label>
+                                    <textarea class="form-control" id="note" name="note" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-primary">Gửi Yêu Cầu</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

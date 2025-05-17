@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi" th:fragment="layout(content)">
 
 <head>
     <meta charset="UTF-8">
@@ -17,36 +17,14 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" th:href="@{/member/home}">
+            <a class="navbar-brand" th:href="@{/member/dashboard}">
                 <i class="fas fa-gamepad me-2"></i>Tiệm Net
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/member/home}">
-                            <i class="fas fa-home me-1"></i>Trang chủ
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/member/menu}">
-                            <i class="fas fa-utensils me-1"></i>Thực đơn
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/member/game-cards}">
-                            <i class="fas fa-ticket-alt me-1"></i>Thẻ game
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/member/orders}">
-                            <i class="fas fa-receipt me-1"></i>Đơn hàng
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                             data-bs-toggle="dropdown">
@@ -54,10 +32,10 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <a class="dropdown-item" th:href="@{/member/profile}">Thông tin cá nhân</a>
+                                <a class="dropdown-item" th:href="@{/member/dashboard}">Trang chủ</a>
                             </li>
                             <li>
-                                <a class="dropdown-item" th:href="@{/member/history}">Lịch sử giao dịch</a>
+                                <a class="dropdown-item" th:href="@{/member/profile}">Thông tin cá nhân</a>
                             </li>
                             <li>
                                 <hr class="dropdown-divider">
@@ -87,8 +65,8 @@
     </div>
 
     <!-- Page Content -->
-    <main class="container py-4" th:fragment="content">
-        <!-- Nội dung động sẽ được nhúng ở đây -->
+    <main class="container py-4">
+        <th:block th:replace="${content}" />
     </main>
 
     <!-- Footer -->
@@ -98,9 +76,9 @@
                 <div class="col-md-6">
                     <h5>Liên hệ</h5>
                     <p>
-                        <i class="fas fa-map-marker-alt me-2"></i>Địa chỉ: 123 Đường ABC, Quận XYZ<br>
-                        <i class="fas fa-phone me-2"></i>Điện thoại: (012) 345-6789<br>
-                        <i class="fas fa-envelope me-2"></i>Email: contact@tiemnet.com
+                        <i class="fas fa-map-marker-alt me-2"></i>An Khánh , Ninh Kiều , Cần Thơ<br>
+                        <i class="fas fa-phone me-2"></i>0987354215<br>
+                        <i class="fas fa-envelope me-2"></i>mr.dang112310@gmail.com
                     </p>
                 </div>
                 <div class="col-md-6 text-md-end">
@@ -114,7 +92,7 @@
             </div>
             <hr>
             <div class="text-center">
-                <p class="mb-0">&copy; 2024 Tiệm Net. All rights reserved.</p>
+                <p class="mb-0">&copy; 2025 Tiệm Net. All rights reserved.</p>
             </div>
         </div>
     </footer>

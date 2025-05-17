@@ -16,6 +16,7 @@ import com.example.quanlytiemnet.models.Computer;
 import com.example.quanlytiemnet.models.ComputerUsage;
 import com.example.quanlytiemnet.repositories.ComputerRepository;
 import com.example.quanlytiemnet.repositories.ComputerUsageRepository;
+import com.example.quanlytiemnet.repositories.TopUpHistoryRepository;
 
 @Service
 public class ComputerService {
@@ -24,6 +25,9 @@ public class ComputerService {
 
 	@Autowired
 	private ComputerUsageRepository usageRepository;
+
+	@Autowired
+	private TopUpHistoryRepository topUpHistoryRepository;
 
 	public List<Computer> getAllComputers() {
 		return computerRepository.findAll();
@@ -56,10 +60,22 @@ public class ComputerService {
 		LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
 		LocalDateTime endOfDay = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
 
+		// Tính doanh thu từ sử dụng máy
 		List<ComputerUsage> todayUsages = usageRepository.findByStartTimeBetween(startOfDay, endOfDay);
-
-		return todayUsages.stream().map(ComputerUsage::getTotalAmount).filter(amount -> amount != null)
+		BigDecimal usageRevenue = todayUsages.stream()
+				.map(ComputerUsage::getTotalAmount)
+				.filter(amount -> amount != null)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		// Tính doanh thu từ nạp tiền
+		BigDecimal topUpRevenue = topUpHistoryRepository
+				.findByTopUpDateBetweenOrderByTopUpDateDesc(startOfDay, endOfDay)
+				.stream()
+				.map(topUp -> topUp.getAmount())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		// Tổng doanh thu = doanh thu nạp tiền
+		return topUpRevenue;
 	}
 
 	public List<Map<String, Object>> getRevenueLastSevenDays() {

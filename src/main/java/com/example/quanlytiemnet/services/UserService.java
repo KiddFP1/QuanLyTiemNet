@@ -36,8 +36,22 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Attempting to load user by username: {}", username);
 
+        // First try to find an employee
+        try {
+            return loadEmployee(username);
+        } catch (UsernameNotFoundException e) {
+            // If employee not found, try to find a member
+            try {
+                return loadMember(username);
+            } catch (UsernameNotFoundException ex) {
+                throw new UsernameNotFoundException("User not found with username: " + username);
+            }
+        }
+    }
+
+    private UserDetails loadEmployee(String username) throws UsernameNotFoundException {
         Employee employee = employeeRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Employee not found"));
 
         String role = employee.getRole();
         if (!role.startsWith("ROLE_")) {
@@ -47,11 +61,31 @@ public class UserService implements UserDetailsService {
         Set<GrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SimpleGrantedAuthority(role));
 
-        log.info("User {} loaded with role: {}", username, role);
+        log.info("Employee {} loaded with role: {}", username, role);
 
         return User.builder()
                 .username(employee.getUsername())
                 .password(employee.getPassword())
+                .authorities(authorities)
+                .accountExpired(false)
+                .accountLocked(false)
+                .credentialsExpired(false)
+                .disabled(false)
+                .build();
+    }
+
+    private UserDetails loadMember(String username) throws UsernameNotFoundException {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
+
+        log.info("Member {} loaded with role: ROLE_MEMBER", username);
+
+        return User.builder()
+                .username(member.getUsername())
+                .password(member.getPassword())
                 .authorities(authorities)
                 .accountExpired(false)
                 .accountLocked(false)

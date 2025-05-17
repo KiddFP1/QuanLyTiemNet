@@ -77,4 +77,10 @@ public class MemberService {
 	public List<TopUpHistory> getTopUpHistoryBetweenDates(LocalDateTime startDate, LocalDateTime endDate) {
 		return topUpHistoryRepository.findByTopUpDateBetweenOrderByTopUpDateDesc(startDate, endDate);
 	}
+
+	@Transactional(readOnly = true)
+	public Member getMemberByUsername(String username) {
+		return memberRepository.findByUsername(username)
+				.orElseThrow(() -> new RuntimeException("Member not found with username: " + username));
+	}
 }
