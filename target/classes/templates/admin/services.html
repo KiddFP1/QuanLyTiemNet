@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::content})}">
 
 <head>
+    <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </head>
@@ -82,10 +83,10 @@
                             <div class="mb-3">
                                 <label class="form-label">Danh mục</label>
                                 <select class="form-control" name="category">
-                                    <option value="Đồ ăn">Đồ ăn</option>
-                                    <option value="Nước uống">Nước uống</option>
-                                    <option value="Đồ ăn vặt">Đồ ăn vặt</option>
-                                    <option value="Khác">Khác</option>
+                                    <option value="Food">Thức ăn</option>
+                                    <option value="Drink">Nước ngọt</option>
+                                    <option value="Snack">Snack</option>
+                                    <option value="Other">Khác</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -125,10 +126,10 @@
                             <div class="mb-3">
                                 <label class="form-label">Danh mục</label>
                                 <select class="form-control" id="editCategory" name="category">
-                                    <option value="Đồ ăn">Đồ ăn</option>
-                                    <option value="Nước uống">Nước uống</option>
-                                    <option value="Đồ ăn vặt">Đồ ăn vặt</option>
-                                    <option value="Khác">Khác</option>
+                                    <option value="Food">Thức ăn</option>
+                                    <option value="Drink">Nước uống</option>
+                                    <option value="Snack">Snack</option>
+                                    <option value="Other">Khác</option>
                                 </select>
                             </div>
                             <div class="mb-3">

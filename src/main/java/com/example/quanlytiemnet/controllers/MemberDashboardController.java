@@ -2,7 +2,9 @@ package com.example.quanlytiemnet.controllers;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -22,6 +24,7 @@ import com.example.quanlytiemnet.services.MemberService;
 import com.example.quanlytiemnet.services.ServiceService;
 import com.example.quanlytiemnet.services.ServiceOrderService;
 import com.example.quanlytiemnet.services.TopUpRequestService;
+import com.example.quanlytiemnet.dto.ActivityDTO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,8 +54,43 @@ public class MemberDashboardController {
         List<ServiceOrder> serviceOrders = serviceOrderService.getMemberOrders(member);
         List<TopUpRequest> topUpRequests = topUpRequestService.getMemberRequests(member);
 
+        // Combine activities
+        List<ActivityDTO> allActivities = new ArrayList<>();
+
+        // Add service orders
+        serviceOrders.forEach(order -> {
+            ActivityDTO activity = new ActivityDTO();
+            activity.setTimestamp(order.getOrderDate());
+            activity.setType("ORDER");
+            activity.setTitle(order.getService().getServiceName());
+            activity.setAmount(order.getTotalPrice());
+            activity.setStatus(order.getStatus());
+            activity.setNote("Số lượng: " + order.getQuantity());
+            allActivities.add(activity);
+        });
+
+        // Add top-up requests
+        topUpRequests.forEach(request -> {
+            ActivityDTO activity = new ActivityDTO();
+            activity.setTimestamp(request.getRequestDate());
+            activity.setType("TOPUP");
+            activity.setTitle("Nạp tiền");
+            activity.setAmount(request.getAmount());
+            activity.setStatus(request.getStatus());
+            activity.setNote(request.getStatus().equals("APPROVED") ? "Đã nạp tiền thành công"
+                    : request.getStatus().equals("REJECTED") ? "Yêu cầu bị từ chối" : "Đang chờ xử lý");
+            allActivities.add(activity);
+        });
+
+        // Sort by timestamp (newest first) and get top 4
+        List<ActivityDTO> recentActivities = allActivities.stream()
+                .sorted()
+                .limit(4)
+                .collect(Collectors.toList());
+
         model.addAttribute("member", member);
         model.addAttribute("services", services);
+        model.addAttribute("recentActivities", recentActivities);
         model.addAttribute("serviceOrders", serviceOrders);
         model.addAttribute("topUpRequests", topUpRequests);
 
@@ -143,5 +181,24 @@ public class MemberDashboardController {
         }
 
         return "redirect:/member/dashboard";
+    }
+
+    @GetMapping("/activities")
+    public String activities(Model model, Authentication authentication) {
+        Member member = memberService.getMemberByUsername(authentication.getName());
+        List<ServiceOrder> serviceOrders = serviceOrderService.getMemberOrders(member);
+        List<TopUpRequest> topUpRequests = topUpRequestService.getMemberRequests(member);
+
+        model.addAttribute("serviceOrders", serviceOrders);
+        model.addAttribute("topUpRequests", topUpRequests);
+        return "member/activities";
+    }
+
+    @GetMapping("/topup-history")
+    public String topupHistory(Model model, Authentication authentication) {
+        Member member = memberService.getMemberByUsername(authentication.getName());
+        List<TopUpRequest> topUpRequests = topUpRequestService.getMemberRequests(member);
+        model.addAttribute("topUpRequests", topUpRequests);
+        return "member/topup-history";
     }
 }

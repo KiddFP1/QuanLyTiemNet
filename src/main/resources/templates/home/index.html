@@ -24,6 +24,7 @@
                 <div class="d-flex align-items-center">
                     <span class="text-light me-3" sec:authentication="name"></span>
                     <form th:action="@{/auth/logout}" method="post" class="m-0">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button type="submit" class="btn btn-outline-light">Đăng xuất</button>
                     </form>
                 </div>

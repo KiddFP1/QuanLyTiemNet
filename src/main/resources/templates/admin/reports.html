@@ -50,7 +50,7 @@
 
         <div class="row">
             <!-- Tổng doanh thu -->
-            <div class="col-md-3 mb-4">
+            <div class="col-md-4 mb-4">
                 <div class="card bg-primary text-white h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
@@ -66,25 +66,10 @@
                 </div>
             </div>
 
-            <!-- Số tiền sử dụng máy -->
-            <div class="col-md-3 mb-4">
-                <div class="card bg-success text-white h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-uppercase mb-2">Số tiền sử dụng máy</h6>
-                                <h3 class="mb-0"
-                                    th:text="${#numbers.formatDecimal(usageAmount,0,'COMMA',0,'POINT')} + ' đ'">0 đ
-                                </h3>
-                            </div>
-                            <i class="fas fa-desktop fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
 
             <!-- Doanh thu từ nạp tiền -->
-            <div class="col-md-3 mb-4">
+            <div class="col-md-4 mb-4">
                 <div class="card bg-info text-white h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
@@ -101,7 +86,7 @@
             </div>
 
             <!-- Số lượng giao dịch -->
-            <div class="col-md-3 mb-4">
+            <div class="col-md-4 mb-4">
                 <div class="card bg-warning text-white h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
