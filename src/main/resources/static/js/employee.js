@@ -93,12 +93,19 @@ function saveShifts() {
 
     console.log("Shifts data to be sent:", JSON.stringify(shifts, null, 2));
 
+    // Lấy CSRF token và header
+    const token = getCsrfToken();
+    const header = getCsrfHeader();
+
+    // Tạo headers với CSRF token
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    headers[header] = token;
+
     return fetch(`/admin/employees/shifts/${employeeId}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            ...getCsrfHeader()
-        },
+        headers: headers,
         body: JSON.stringify(shifts)
     })
         .then(response => response.json())
@@ -278,12 +285,16 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             const formData = new FormData(this);
 
+            // Lấy CSRF token
+            const token = getCsrfToken();
+            const header = getCsrfHeader();
+            const headers = {};
+            headers[header] = token;
+
             // Lưu thông tin cơ bản của nhân viên trước
             fetch('/admin/employees/update', {
                 method: 'POST',
-                headers: {
-                    ...getCsrfHeader()
-                },
+                headers: headers,
                 body: formData
             })
                 .then(response => {
@@ -310,13 +321,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
 
+                    // Thêm CSRF token vào header khi gửi dữ liệu shifts
+                    const jsonHeaders = {
+                        'Content-Type': 'application/json'
+                    };
+                    jsonHeaders[header] = token;
+
                     // Gửi dữ liệu ca làm việc lên server
                     return fetch(`/admin/employees/shifts/${employeeId}`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...getCsrfHeader()
-                        },
+                        headers: jsonHeaders,
                         body: JSON.stringify(shifts)
                     });
                 })
@@ -401,11 +415,19 @@ document.addEventListener('DOMContentLoaded', function () {
     // Hàm hủy ca làm việc cho nhân viên
     window.cancelEmployeeShift = function (employeeId, shiftId, dayOfWeek) {
         if (confirm('Bạn có chắc chắn muốn hủy ca làm việc này?')) {
+            // Lấy CSRF token và header
+            const token = getCsrfToken();
+            const header = getCsrfHeader();
+
+            // Tạo headers với CSRF token
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            headers[header] = token;
+
             fetch(`/admin/employees/shifts/cancel`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: headers,
                 body: JSON.stringify({
                     employeeId: employeeId,
                     shiftId: shiftId,
@@ -447,8 +469,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const scheduleRoot = document.getElementById('employee-schedule-root');
     if (!scheduleRoot) return; // Exit if element not found
 
+    // Lấy CSRF token và header
+    const token = getCsrfToken();
+    const header = getCsrfHeader();
+
+    // Tạo headers với CSRF token
+    const headers = {};
+    headers[header] = token;
+
     // Gọi API để lấy dữ liệu lịch làm việc của tất cả nhân viên
-    fetch('/admin/employees/shifts/all')
+    fetch('/admin/employees/shifts/all', {
+        headers: headers
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');

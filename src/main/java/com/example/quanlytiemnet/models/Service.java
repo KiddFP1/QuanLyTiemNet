@@ -24,7 +24,7 @@ public class Service {
 	private String serviceName;
 	private BigDecimal price;
 
-	@Column(columnDefinition = "NVARCHAR(50) COLLATE Vietnamese_CI_AS")
+	@Column(columnDefinition = "nvarchar(50)")
 	private String category;
 
 	private Integer stockQuantity;

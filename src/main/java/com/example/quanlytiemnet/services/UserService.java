@@ -18,6 +18,7 @@ import com.example.quanlytiemnet.repositories.EmployeeRepository;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
 
 @Service
@@ -58,15 +59,12 @@ public class UserService implements UserDetailsService {
             role = "ROLE_" + role;
         }
 
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority(role));
-
         log.info("Employee {} loaded with role: {}", username, role);
 
         return User.builder()
                 .username(employee.getUsername())
                 .password(employee.getPassword())
-                .authorities(authorities)
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority(role)))
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)
@@ -78,15 +76,12 @@ public class UserService implements UserDetailsService {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
-
         log.info("Member {} loaded with role: ROLE_MEMBER", username);
 
         return User.builder()
                 .username(member.getUsername())
                 .password(member.getPassword())
-                .authorities(authorities)
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_MEMBER")))
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)

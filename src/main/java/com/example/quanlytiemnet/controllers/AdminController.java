@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.quanlytiemnet.models.Computer;
 import com.example.quanlytiemnet.models.ServiceOrder;
 import com.example.quanlytiemnet.models.TopUpRequest;
+import com.example.quanlytiemnet.models.Member;
 import com.example.quanlytiemnet.services.ComputerService;
 import com.example.quanlytiemnet.services.ServiceOrderService;
 import com.example.quanlytiemnet.services.TopUpRequestService;
+import com.example.quanlytiemnet.services.MemberService;
 import com.example.quanlytiemnet.repositories.ServiceOrderRepository;
 import com.example.quanlytiemnet.repositories.TopUpRequestRepository;
 import com.google.gson.Gson;
@@ -38,6 +40,9 @@ public class AdminController {
 
 	@Autowired
 	private TopUpRequestService topUpRequestService;
+
+	@Autowired
+	private MemberService memberService;
 
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
@@ -139,9 +144,30 @@ public class AdminController {
 		try {
 			ServiceOrder order = serviceOrderRepository.findById(id)
 					.orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+			// Only refund if the order is not already canceled or completed
+			if (!order.getStatus().equals("CANCELLED") && !order.getStatus().equals("COMPLETED")) {
+				// Get the member associated with the order
+				Member member = order.getMember();
+
+				// Refund the money to the member's balance
+				BigDecimal refundAmount = order.getTotalPrice();
+				member.setBalance(member.getBalance().add(refundAmount));
+
+				// Update the member
+				memberService.updateMember(member);
+
+				log.info("Refunded {} to member ID {} for canceled order {}",
+						refundAmount, member.getId(), order.getId());
+			}
+
+			// Update order status
 			order.setStatus("CANCELLED");
 			serviceOrderService.updateOrder(order);
-			return ResponseEntity.ok(Map.of("success", true));
+
+			return ResponseEntity.ok(Map.of(
+					"success", true,
+					"message", "Đơn hàng đã bị hủy và tiền đã được hoàn lại"));
 		} catch (Exception e) {
 			log.error("Error canceling order {}", id, e);
 			return ResponseEntity.badRequest().body(Map.of(

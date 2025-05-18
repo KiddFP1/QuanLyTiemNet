@@ -1,0 +1,20 @@
+-- Kiểm tra thông tin bảng ServiceOrder và TopUpRequest
+EXEC sp_help 'ServiceOrder';
+GO
+
+EXEC sp_help 'TopUpRequest';
+GO
+
+-- Hiển thị danh sách các cột của bảng ServiceOrder
+SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'ServiceOrder'
+ORDER BY ORDINAL_POSITION;
+GO
+
+-- Hiển thị danh sách các cột của bảng TopUpRequest
+SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'TopUpRequest'
+ORDER BY ORDINAL_POSITION;
+GO 

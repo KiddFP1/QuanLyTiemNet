@@ -8,11 +8,9 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.example.quanlytiemnet.services.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -51,27 +49,11 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http
-                                .csrf(csrf -> csrf
-                                                .ignoringRequestMatchers("/api/**")
-                                                .ignoringRequestMatchers("/auth/**")
-                                                .ignoringRequestMatchers("/admin/**"))
+                                // .csrf(csrf -> csrf.disable())
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**",
                                                                 "/error")
                                                 .permitAll()
-                                                // Cho phép xem lịch làm việc
-                                                .requestMatchers(
-                                                                "/admin/employees",
-                                                                "/admin/employees/shifts/**",
-                                                                "/admin/employees/shift-schedule/**")
-                                                .hasAnyRole("ADMIN", "EMPLOYEE")
-                                                // Chặn các thao tác CRUD
-                                                .requestMatchers(
-                                                                "/admin/employees/add",
-                                                                "/admin/employees/update",
-                                                                "/admin/employees/delete/**",
-                                                                "/admin/employees/edit/**")
-                                                .hasRole("ADMIN")
                                                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "EMPLOYEE")
                                                 .requestMatchers("/employee/**").hasRole("EMPLOYEE")
                                                 .requestMatchers("/member/**").hasRole("MEMBER")
@@ -84,7 +66,7 @@ public class SecurityConfig {
                                                 .permitAll())
                                 .logout(logout -> logout
                                                 .logoutUrl("/auth/logout")
-                                                .logoutSuccessUrl("/auth/login")
+                                                .logoutSuccessUrl("/auth/login?logout")
                                                 .permitAll());
 
                 return http.build();
